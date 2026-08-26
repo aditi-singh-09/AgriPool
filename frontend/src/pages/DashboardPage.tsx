@@ -21,6 +21,9 @@ export function DashboardPage() {
 
   if (!isConnected) return null;
 
+  const totalEarningsStroops = payments?.reduce((acc, p) => acc + BigInt(p.amount), 0n) || 0n;
+  const totalEarningsXLM = (Number(totalEarningsStroops) / 10_000_000).toFixed(2);
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -49,6 +52,12 @@ export function DashboardPage() {
             </Button>
           </Link>
         )}
+      </div>
+
+      <div className="mt-8 rounded-xl bg-graphite-800 p-6 shadow-sm border border-marigold-500/20">
+        {/* Feature: Total Seasonal Earnings Dashboard Card */}
+        <h2 className="text-sm font-medium text-graphite-600">Total Seasonal Earnings</h2>
+        <p className="mt-2 font-display text-4xl font-semibold text-marigold-400">{totalEarningsXLM} XLM</p>
       </div>
 
       <section className="mt-10">
