@@ -18,7 +18,25 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function getLocal<T>(key: string, defaultValue: T): T {
   const stored = localStorage.getItem(key);
-  if (!stored) return defaultValue;
+  if (!stored) {
+    if (key === 'agripool_pools') {
+      const defaultPools = [{
+        _id: 'default_pool',
+        poolId: 'demo_cooperative_pool',
+        cooperativeName: 'Demo Cooperative',
+        participants: [
+          { role: 'farmer', displayName: 'Farmer', shareBps: 7000 },
+          { role: 'cooperative', displayName: 'Demo Cooperative', shareBps: 2000 },
+          { role: 'transport', displayName: 'Transport Co', shareBps: 1000 },
+        ],
+        active: true,
+        createdAt: new Date().toISOString()
+      }];
+      localStorage.setItem(key, JSON.stringify(defaultPools));
+      return defaultPools as unknown as T;
+    }
+    return defaultValue;
+  }
   try {
     return JSON.parse(stored);
   } catch {

@@ -67,7 +67,12 @@ export function useWalletAuth() {
         isInitialized: true,
       }));
     };
+
     void run();
+
+    const handleSync = () => void run();
+    window.addEventListener('agripool_wallet_sync', handleSync);
+    return () => window.removeEventListener('agripool_wallet_sync', handleSync);
   }, []);
 
   const connect = useCallback(
@@ -106,9 +111,12 @@ export function useWalletAuth() {
           role,
           displayName,
           isConnected: true,
+          isInitialized: true,
           isFreighterInstalled: true,
           isConnecting: false,
         }));
+        
+        window.dispatchEvent(new Event('agripool_wallet_sync'));
       } catch {
         setState((s) => ({ ...s, isConnecting: false, error: 'Could not connect to Freighter' }));
       }
@@ -119,8 +127,9 @@ export function useWalletAuth() {
   const disconnect = useCallback(() => {
     localStorage.removeItem(ROLE_KEY);
     localStorage.removeItem(NAME_KEY);
-    setState(initial);
-  }, []);
+    setState({ ...initial, isInitialized: true, isFreighterInstalled: state.isFreighterInstalled });
+    window.dispatchEvent(new Event('agripool_wallet_sync'));
+  }, [state.isFreighterInstalled]);
 
   return { ...state, connect, disconnect };
 }
