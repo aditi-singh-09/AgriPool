@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from '../../lib/api';
 import type { PaymentRecord } from '../../types';
 
 export function useMyPayments() {
@@ -54,7 +53,7 @@ export function useRecordPayment() {
         amount: input.amount,
         transactionHash: input.transactionHash,
         ledgerTimestamp: input.ledgerTimestamp,
-        status: 'settled',
+        status: 'confirmed',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
