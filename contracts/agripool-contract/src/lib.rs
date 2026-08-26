@@ -12,11 +12,11 @@ mod events;
 mod types;
 
 use soroban_sdk::{
-    contract, contractimpl, contractmeta, panic_with_error, token, Address, Env, String, Symbol,
+    contract, contractimpl, contractmeta, token, Address, Env, String, Symbol,
     Vec,
 };
 
-pub use types::{DataKey, Error, Participant, Payment, Pool, Listing};
+pub use types::{DataKey, Error, Listing, Participant, Payment, Pool};
 
 contractmeta!(
     key = "Description",
@@ -228,7 +228,11 @@ impl AgriPoolContract {
             return Err(Error::ListingAlreadyExists);
         }
 
-        if !env.storage().persistent().has(&DataKey::Pool(pool_id.clone())) {
+        if !env
+            .storage()
+            .persistent()
+            .has(&DataKey::Pool(pool_id.clone()))
+        {
             return Err(Error::PoolNotFound);
         }
 
