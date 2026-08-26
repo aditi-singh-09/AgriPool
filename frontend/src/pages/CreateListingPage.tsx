@@ -39,7 +39,13 @@ export function CreateListingPage() {
   const onSubmit = async (values: FormOutput) => {
     try {
       const listing = await createListing.mutateAsync(values);
-      toast.success('Listing published');
+      toast.success('Listing published on-chain!', {
+        description: 'View on Stellar Expert',
+        action: {
+          label: 'Open',
+          onClick: () => window.open(`https://stellar.expert/explorer/testnet/tx/${listing.txHash}`, '_blank'),
+        },
+      });
       navigate(`/marketplace/${listing._id}`);
     } catch (error) {
       toast.error(getApiErrorMessage(error));

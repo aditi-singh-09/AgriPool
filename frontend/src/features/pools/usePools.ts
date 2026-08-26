@@ -56,7 +56,7 @@ export function useRegisterPool() {
   return useMutation({
     mutationFn: async (input: RegisterPoolInput) => {
       if (!auth.address) throw new Error('Not connected');
-      await submitCreatePool({
+      const txHash = await submitCreatePool({
         poolId: input.poolId,
         cooperativeName: input.cooperativeName,
         participants: input.participants,
@@ -67,8 +67,9 @@ export function useRegisterPool() {
         ...input, 
         active: true,
         lastKnownPaymentCount: 0,
-        createdAt: new Date().toISOString()
-      } as DistributionPool;
+        createdAt: new Date().toISOString(),
+        txHash
+      };
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['pools'] });

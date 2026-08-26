@@ -61,7 +61,7 @@ export function CreatePoolPage() {
 
   const onSubmit = async (values: FormOutput) => {
     try {
-      await registerPool.mutateAsync({
+      const result = await registerPool.mutateAsync({
         poolId: values.poolId,
         cooperativeName: values.cooperativeName,
         participants: values.participants.map((p) => ({
@@ -71,7 +71,13 @@ export function CreatePoolPage() {
           shareBps: Math.round(p.sharePercent * 100),
         })),
       });
-      toast.success('Pool registered on-chain');
+      toast.success('Pool registered on-chain!', {
+        description: 'View on Stellar Expert',
+        action: {
+          label: 'Open',
+          onClick: () => window.open(`https://stellar.expert/explorer/testnet/tx/${result.txHash}`, '_blank'),
+        },
+      });
       navigate('/dashboard');
     } catch (error) {
       toast.error(getApiErrorMessage(error));

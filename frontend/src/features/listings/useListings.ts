@@ -102,7 +102,7 @@ export function useCreateListing() {
       
       const priceStroops = Math.floor(input.pricePerUnit * 10000000).toString();
       
-      await submitCreateListing({
+      const txHash = await submitCreateListing({
         listingId,
         poolId: input.poolId,
         farmerAddress: auth.address,
@@ -111,7 +111,7 @@ export function useCreateListing() {
         quantity: input.quantityAvailable,
       });
 
-      return { _id: listingId, sellerId: auth.address, createdAt: new Date().toISOString(), ...input, status: 'active' } as Listing;
+      return { _id: listingId, sellerId: auth.address, createdAt: new Date().toISOString(), ...input, status: 'active', txHash } as Listing & { txHash: string };
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['listings'] });
