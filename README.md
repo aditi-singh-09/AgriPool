@@ -31,6 +31,18 @@ AgriPool is a production-ready agricultural supply chain platform built on Stell
 
 ---
 
+## 📸 Screenshots & Evidence
+
+| Cooperative Dashboard | Mobile Responsive View |
+|:---:|:---:|
+| <img src="screenshots/product ui.png" width="400" alt="Product UI"> | <img src="screenshots/mobile ui.png" width="400" alt="Mobile Design"> |
+
+| Settlement Tickets & Explorer |
+|:---:|
+| <img src="screenshots/analytics.png" width="400" alt="Analytics"> |
+
+---
+
 ## 👥 User Onboarding
 
 We successfully onboarded **11 real users** with Stellar Testnet wallets and verified on-chain transactions to interact with AgriPool. You can view the full exported CSV sheet containing all users, their emails, wallet addresses, and feedback.
