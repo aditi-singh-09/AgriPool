@@ -185,9 +185,9 @@ export function ListingDetailPage() {
               settled
             />
             {txHash && (
-              <Link to={`/explorer/${txHash}`} className="text-sm text-marigold-400 hover:underline">
+              <a href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} target="_blank" rel="noreferrer" className="text-sm text-marigold-400 hover:underline">
                 View this settlement in the transaction explorer
-              </Link>
+              </a>
             )}
           </div>
         )}

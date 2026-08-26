@@ -33,7 +33,12 @@ export function usePool(poolId: string | undefined) {
         _id: poolId,
         poolId: poolId,
         cooperativeName: poolId, // We don't store cooperativeName on chain right now, just the poolId
-        participants: data.participants,
+        participants: data.participants.map((p: any) => ({
+          role: p.role,
+          displayName: p.role,
+          walletAddress: p.wallet,
+          shareBps: Number(p.share_bps),
+        })),
         active: data.active,
         lastKnownPaymentCount: data.payment_count,
         createdAt: new Date().toISOString(), // Mocked since we don't store pool creation time on chain
