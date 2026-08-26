@@ -47,7 +47,6 @@ export function useRecordPayment() {
         _id: input.paymentId,
         paymentId: input.paymentId,
         poolId: input.poolId,
-        listingId: input.listingId,
         buyerWallet: input.buyerWallet,
         tokenAddress: input.tokenAddress,
         amount: input.amount,
