@@ -38,8 +38,8 @@ export function useWalletAuth() {
   // Restore saved role + name on mount, and check if wallet still connected
   useEffect(() => {
     const run = async () => {
-      const { isConnected } = await freighterIsConnected();
-      if (!isConnected) {
+      const connected = await freighterIsConnected();
+      if (!connected) {
         setState((s) => ({ ...s, isFreighterInstalled: false }));
         return;
       }
@@ -68,8 +68,8 @@ export function useWalletAuth() {
     async (role: Exclude<UserRole, 'admin'>, displayName: string) => {
       setState((s) => ({ ...s, isConnecting: true, error: null }));
       try {
-        const { isConnected } = await freighterIsConnected();
-        if (!isConnected) {
+        const connected = await freighterIsConnected();
+        if (!connected) {
           setState((s) => ({
             ...s,
             isConnecting: false,
