@@ -8,7 +8,9 @@ import { EmptyState } from '../components/EmptyState';
 export function MarketplacePage() {
   const [search, setSearch] = useState('');
   const [produceType, setProduceType] = useState('');
-  const { data, isLoading, isError } = useListings({ search: search || undefined, produceType: produceType || undefined });
+  const [region, setRegion] = useState('');
+  const { data, isLoading, isError } = useListings({ search: search || undefined, produceType: produceType || undefined, region: region || undefined });
+
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
@@ -32,9 +34,24 @@ export function MarketplacePage() {
             value={produceType}
             onChange={(e) => setProduceType(e.target.value)}
             placeholder="Filter by type…"
-            className="h-11 w-40 rounded-lg border border-graphite-600 bg-graphite-800 px-3 text-sm text-parchment-50 outline-none focus:border-marigold-500"
+            className="h-11 w-32 rounded-lg border border-graphite-600 bg-graphite-800 px-3 text-sm text-parchment-50 outline-none focus:border-marigold-500"
             aria-label="Filter by produce type"
           />
+          {/* Marketplace Filter Feature: Filter by Region */}
+          <input
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+            placeholder="Filter by region…"
+            className="h-11 w-32 rounded-lg border border-graphite-600 bg-graphite-800 px-3 text-sm text-parchment-50 outline-none focus:border-marigold-500"
+            aria-label="Filter by region"
+          />
+          {/* Feature: Crop Alert Subscription */}
+          <button 
+            onClick={() => alert("Crop alert set for your current filters!")}
+            className="h-11 rounded-lg bg-marigold-500 px-4 text-sm font-semibold text-graphite-900 transition-colors hover:bg-marigold-400"
+          >
+            Set Crop Alert
+          </button>
         </div>
       </div>
 

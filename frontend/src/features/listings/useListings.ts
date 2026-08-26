@@ -47,7 +47,19 @@ export function useListings(filters: ListingFilters) {
         }
       }
 
-      return { listings, pagination: { page: 1, pages: 1, total: listings.length } };
+      // Local filtering
+      let filteredListings = listings;
+      if (filters.search) {
+        filteredListings = filteredListings.filter(l => l.title.toLowerCase().includes(filters.search!.toLowerCase()));
+      }
+      if (filters.produceType) {
+        filteredListings = filteredListings.filter(l => l.produceType.toLowerCase().includes(filters.produceType!.toLowerCase()));
+      }
+      if (filters.region) {
+        filteredListings = filteredListings.filter(l => l.region?.toLowerCase().includes(filters.region!.toLowerCase()));
+      }
+
+      return { listings: filteredListings, pagination: { page: 1, pages: 1, total: filteredListings.length } };
     },
   });
 }
