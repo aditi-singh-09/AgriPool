@@ -54,7 +54,6 @@ export function useRecordPayment() {
         ledgerTimestamp: input.ledgerTimestamp,
         status: 'confirmed',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       };
       records.unshift(newRecord);
       localStorage.setItem('agripool_payments', JSON.stringify(records));
