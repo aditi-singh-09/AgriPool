@@ -6,8 +6,10 @@ export function useMyPayments() {
   return useQuery({
     queryKey: ['payments', 'mine'],
     queryFn: async () => {
-      const res = await api.get('/payments/mine');
-      return res.data.records as PaymentRecord[];
+      // Since the backend is removed, we mock fetching from localStorage for now.
+      const local = localStorage.getItem('agripool_payments');
+      if (local) return JSON.parse(local) as PaymentRecord[];
+      return [];
     },
   });
 }
@@ -16,8 +18,10 @@ export function usePoolPayments(poolId: string | undefined) {
   return useQuery({
     queryKey: ['payments', 'pool', poolId],
     queryFn: async () => {
-      const res = await api.get(`/payments/pool/${poolId}`);
-      return res.data.records as PaymentRecord[];
+      const local = localStorage.getItem('agripool_payments');
+      if (!local) return [];
+      const records = JSON.parse(local) as PaymentRecord[];
+      return records.filter((r: PaymentRecord) => r.poolId === poolId);
     },
     enabled: Boolean(poolId),
   });
@@ -38,8 +42,25 @@ export function useRecordPayment() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (input: RecordPaymentInput) => {
-      const res = await api.post('/payments', input);
-      return res.data.record as PaymentRecord;
+      const local = localStorage.getItem('agripool_payments');
+      const records = local ? JSON.parse(local) as PaymentRecord[] : [];
+      const newRecord: PaymentRecord = {
+        _id: input.paymentId,
+        paymentId: input.paymentId,
+        poolId: input.poolId,
+        listingId: input.listingId,
+        buyerWallet: input.buyerWallet,
+        tokenAddress: input.tokenAddress,
+        amount: input.amount,
+        transactionHash: input.transactionHash,
+        ledgerTimestamp: input.ledgerTimestamp,
+        status: 'settled',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      records.unshift(newRecord);
+      localStorage.setItem('agripool_payments', JSON.stringify(records));
+      return newRecord;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['payments'] });
