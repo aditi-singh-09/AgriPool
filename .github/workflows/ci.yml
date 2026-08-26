@@ -19,6 +19,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: contracts
+      - name: Code formatting
+        working-directory: contracts
+        run: cargo fmt -- --check
+      - name: Clippy checks
+        working-directory: contracts
+        run: cargo clippy -- -D warnings
       - name: Run contract tests
         working-directory: contracts
         env:
