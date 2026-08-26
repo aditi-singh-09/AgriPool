@@ -5,6 +5,7 @@ import {
   BASE_FEE,
   Networks,
   rpc,
+  xdr,
 } from '@stellar/stellar-sdk';
 import { signTransaction } from '@stellar/freighter-api';
 import type { Participant } from '../../types';
@@ -30,17 +31,27 @@ export async function submitCreatePool(args: CreatePoolArgs): Promise<string> {
   // In stellar-sdk, passing an array of objects for a Soroban Vec<Participant>
   // requires explicitly formatting the keys if they aren't standard or if it fails
   // inference, but the SDK has gotten good at inferring structs if keys match.
-  // Our Rust struct `Participant` has fields: `role` (Symbol), `wallet` (Address), `share_bps` (u32).
-  const participantsList = args.participants.map(p => ({
-    role: nativeToScVal(p.role, { type: 'symbol' }),
-    wallet: nativeToScVal(p.walletAddress, { type: 'address' }),
-    share_bps: nativeToScVal(p.shareBps, { type: 'u32' })
-  }));
+  const participantsList = args.participants.map((p) => {
+    return xdr.ScVal.scvMap([
+      new xdr.ScMapEntry({
+        key: nativeToScVal('role', { type: 'symbol' }),
+        val: nativeToScVal(p.role, { type: 'symbol' }),
+      }),
+      new xdr.ScMapEntry({
+        key: nativeToScVal('share_bps', { type: 'symbol' }),
+        val: nativeToScVal(p.shareBps, { type: 'u32' }),
+      }),
+      new xdr.ScMapEntry({
+        key: nativeToScVal('wallet', { type: 'symbol' }),
+        val: nativeToScVal(p.walletAddress, { type: 'address' }),
+      }),
+    ]);
+  });
 
   const operation = contract.call(
     'create_pool',
     nativeToScVal(args.poolId, { type: 'symbol' }),
-    nativeToScVal(participantsList), 
+    xdr.ScVal.scvVec(participantsList), 
     nativeToScVal(args.callerAddress, { type: 'address' }),
   );
 
