@@ -5,10 +5,10 @@ import type { UserRole } from '../types';
 import { Spinner } from './Spinner';
 
 export function ProtectedRoute({ children, roles }: { children: ReactNode; roles?: UserRole[] }) {
-  const { isConnected, isConnecting, role } = useWalletAuth();
+  const { isConnected, isConnecting, isInitialized, role } = useWalletAuth();
   const location = useLocation();
 
-  if (isConnecting) {
+  if (!isInitialized || isConnecting) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <Spinner />

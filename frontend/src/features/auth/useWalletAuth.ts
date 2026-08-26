@@ -18,6 +18,7 @@ export interface WalletAuthState {
   isConnected: boolean;
   isFreighterInstalled: boolean;
   isConnecting: boolean;
+  isInitialized: boolean;
   error: string | null;
 }
 
@@ -29,6 +30,7 @@ const initial: WalletAuthState = {
   isConnected: false,
   isFreighterInstalled: false,
   isConnecting: false,
+  isInitialized: false,
   error: null,
 };
 
@@ -38,15 +40,18 @@ export function useWalletAuth() {
   // Restore saved role + name on mount, and check if wallet still connected
   useEffect(() => {
     const run = async () => {
-      const connected = await freighterIsConnected();
+      const { isConnected: connected } = await freighterIsConnected();
       if (!connected) {
-        setState((s) => ({ ...s, isFreighterInstalled: false }));
+        setState((s) => ({ ...s, isFreighterInstalled: false, isInitialized: true }));
         return;
       }
       setState((s) => ({ ...s, isFreighterInstalled: true }));
 
       const addressResult = await getAddress();
-      if (addressResult.error || !addressResult.address) return;
+      if (addressResult.error || !addressResult.address) {
+        setState((s) => ({ ...s, isInitialized: true }));
+        return;
+      }
 
       const networkResult = await getNetworkDetails();
       const savedRole = localStorage.getItem(ROLE_KEY) as WalletAuthState['role'];
@@ -58,7 +63,8 @@ export function useWalletAuth() {
         network: networkResult.network ?? null,
         role: savedRole,
         displayName: savedName,
-        isConnected: true,
+        isConnected: Boolean(addressResult.address && savedRole),
+        isInitialized: true,
       }));
     };
     void run();
@@ -68,7 +74,7 @@ export function useWalletAuth() {
     async (role: Exclude<UserRole, 'admin'>, displayName: string) => {
       setState((s) => ({ ...s, isConnecting: true, error: null }));
       try {
-        const connected = await freighterIsConnected();
+        const { isConnected: connected } = await freighterIsConnected();
         if (!connected) {
           setState((s) => ({
             ...s,
