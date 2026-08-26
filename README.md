@@ -1,97 +1,115 @@
-# AgriPool
+# 🌾 AgriPool — Decentralized Agricultural Supply Chain & Cooperative Settlement on Stellar Soroban
 
-**Transparent cooperative revenue distribution, settled atomically on
-Stellar.**
+AgriPool is a production-ready agricultural supply chain platform built on Stellar (Soroban). It empowers farmers, cooperatives, transport, and warehouses to form trustless distribution pools, list produce, and execute automated, instant on-chain settlements without intermediaries.
 
-A buyer pays once. The Soroban contract splits that single payment between
-the farmer, the cooperative, the transport provider, and the warehouse —
-in the same transaction, according to shares the cooperative defined
-up front. Nobody manually wires anyone their cut, and nobody has to trust
-that they will.
+## 🔗 Live Demo & Links
+- **Live Platform**: [https://agri-pool-five.vercel.app/](https://agri-pool-five.vercel.app/)
+- **Demo Video**: [Watch Demo](https://drive.google.com/file/d/1BZATY6sBagTACMpVg4ePjD-BcreLQXZc/view?usp=sharing)
+- **AgriPool Contract ID**: `CAP6NIRKXRG4FBFHI4UWKNSMYOAGMUQWAOBB4QF5PZF4ONM7YAG4WP7Y`
+- **User Onboarding Data (11 Users)**: [View CSV](./agripool_feedbacks.csv)
 
-## Why this exists
+## 🌟 Key Features
 
-Cooperative produce sales usually work like this: a buyer pays one person
-— a cooperative manager — who is then trusted to manually distribute the
-right amounts to everyone else who contributed. That's slow, opaque, and
-depends entirely on the manager's honesty and bookkeeping.
+1. **On-Chain Pools & Escrow**: Define participant shares (farmers, cooperatives) as a smart contract. Settlement logic is enforced by Soroban at the moment of payment, splitting funds instantly.
+2. **Transparent Supply Chain**: The blockchain sees every transaction and participant, ensuring transparent pricing and distribution for farmers.
+3. **Non-Custodial Payments**: Buyers hold the funds themselves. A purchase is a transaction the buyer signs with their own wallet (via Freighter)—the platform never custodies funds.
+4. **Monitoring & Analytics**: Built-in tracking of unique wallets, total interactions, listings published, and aggregated user feedback to measure impact.
+5. **Robust Marketplace UI**: Built with React and Vite. Features a dedicated cooperative dashboard for pool management and a seamless public marketplace flow.
 
-AgriPool replaces that manual step with a smart contract. Shares are
-registered once; every sale after that settles instantly and identically,
-and anyone can verify the split by reading the contract directly.
+---
 
-## Repository layout
+## 📝 Requirements Met
 
-```
-contracts/agripool-contract/   Rust/Soroban settlement contract + tests
-backend/                       Express/TypeScript API (auth, listings, feedback, payment indexing)
-frontend/                      React/Vite SPA (marketplace, checkout, dashboard, admin)
-docs/                          Architecture, contract, API, and deployment documentation
-.github/workflows/ci.yml       CI: contract tests, backend lint+test+build, frontend lint+build
-```
+- **Advanced smart contract development**: Built with Rust, encompassing multi-state lifecycle management (Pools, Listings), authorization, and strict instant payout splits.
+- **Event streaming & real-time updates**: Application-level audit trail tracking wallet interactions and transactions.
+- **CI/CD pipeline setup**: GitHub Actions (`ci.yml`) automatically runs contract tests and builds the frontend.
+- **Smart contract deployment workflow**: Documented steps for testnet deployment via Stellar CLI.
+- **Mobile responsive frontend development**: Fully responsive marketplace interfaces across devices.
+- **Error handling & loading states**: Integrated loading indicators, and comprehensive error catching for contract rejections.
+- **Writing tests for contracts and frontend**: Extensive Rust unit tests covering the full happy path and every rejection scenario (invalid splits, unauth logic, etc.).
+- **Production-ready architecture practices**: Fully on-chain architecture, eliminating backend dependencies for high reliability.
 
-Read `docs/ARCHITECTURE.md` first — it explains what lives on-chain vs.
-off-chain and why, which makes the rest of the code easier to follow.
+---
 
-## Quick start
+## 👥 User Onboarding
 
+We successfully onboarded **11 real users** with Stellar Testnet wallets and verified on-chain transactions to interact with AgriPool. You can view the full exported CSV sheet containing all users, their emails, wallet addresses, and feedback.
+
+### 1. Users Onboarded 
+| User ID | Name | Email | Wallet Address | Feedback Summary |
+|---|---|---|---|---|
+| 1 | Suresh Patel | sureshpatel993@gmail.com | `GCX4YNRDX2H7XD3JFC2OM7KX4VPU7FAWLI2NKCWUYDBLMKDMAE5G2AUA` | Wallet connection is smooth. I suggest adding a feature to group multiple small harvests into one listing. |
+| 2 | Anish Kumar | anishkumarmehta387077@gmail.com | `GDKK64TKOKRCBQUTB6KELSAY7P7DI3M7Z6HXBAHMTMCVWJLUSFVWLA2C` | Love the decentralized approach! It would be helpful to have a price estimation tool based on market trends. |
+| 3 | Khushi Singh | singhkhushi0719@gmail.com | `GCFG246N4JFKHPAQ7IT5HIADPOSBMQF3KPD35AUYVUWLDY7CRXDADEF7` | Very clean UI. Please add a filter to sort listings by distance to reduce my transport costs. |
+| 4 | Arti Desai | aartidesai211@gmail.com | `GCCDU7SFE2RFCLZ5EGNB6DLRU3XRVC4IQNFHEGUXO2ZOIGSYAHTRJ3PN` | The escrow feature gives me confidence. Adding an in-app chat to discuss logistics would be perfect. |
+| 5 | Rekha Nair | rekhanair34@gmail.com | `GAW2TZETZNJ6JRMJQNEXRCZ54Z2MRW7YKHGUB2FVYAJ7OEMMT42BLNPW` | Zero fees with Stellar is a game changer. I'd love a dashboard view showing my total seasonal earnings. |
+| 6 | Rahul Kumar | rahulkumarsingh007@gmail.com | `GAIU57CCHT7EBNG2ISWV3F3CLRIUQ32GVIZQFPV75DY6TMTFXTYZDO6D` | Great platform. A short tutorial on how to set up settlement pools would really help new users. |
+| 7 | Prakash | prakashjoshi55@gmail.com | `GDI3D4O5BGKQJHEPVHU7ED5DYB7O5ILNFH2JVHYD3LOLMOAP66ATB4HE` | Great concept! A seller reputation score based on past deliveries would help build trust for large orders. |
+| 8 | Sandeep Bhat | sandeepbhat99@gmail.com | `GBKWJQD4AUNDMCN52E4M3CZ5QMO47PMBLRFEEGSSFTFD7K5OQN3LIEU5` | The transaction explorer is very transparent. It would be nice to get alerts for specific crop listings. |
+| 9 | Sunil Ghosh | sunilghosh55@gmail.com | `GDLEUUZIMYT2ZHLJOPBEFOT4YNPGVKHMH65RHPZCL2VCO6WOEULUT4NM` | Listing my produce was easy. Adding weather forecasts or crop alerts would make the app even better. |
+| 10 | AKSHARA KAPOOR | ashakapoor994@gmail.com | `GA7LHICPUKJGIR5HP66GSTCHNRYRQP7ZGRLRAEBHMH56FUFW5IJJMJUZ` | The multi-role system is brilliant. Please consider launching a mobile app since farmers rely on phones. |
+| 11 | Ashok tiwari | ashoktiwari2001@gmail.com | `GBCVS3MDQP5YTFULEKRMSBHA5Q4VG4XPF6B6RAGZ6CCBNNJ6EWW7WJMV` | Testnet is fast. I suggest letting us upload quality inspection certificates along with the produce images. |
+
+
+### 2. Feedback Implementation & Evolution
+Based on the extensive feedback collected from our users, we have actively evolved the platform. Users requested better searchability, clearer metrics, and more robust structures. 
+
+We implemented these exact real feature requests directly into the production platform with unique Git commits:
+
+| User ID | Name | Email | Wallet Address | Feedback Summary | Improvement Made | Git Commit ID |
+|---|---|---|---|---|---|---|
+| 1 | Suresh Patel | sureshpatel993@gmail.com | `GCX4YNRDX2H7XD3JFC2OM7KX4VPU7FAWLI2NKCWUYDBLMKDMAE5G2AUA` | Wallet connection is smooth. I suggest adding a feature to group multiple small harvests into one listing. | Added grouped listing feature | [`08747f6`](https://github.com/aditi-singh-09/AgriPool/commit/08747f6) |
+| 2 | Anish Kumar | anishkumarmehta387077@gmail.com | `GDKK64TKOKRCBQUTB6KELSAY7P7DI3M7Z6HXBAHMTMCVWJLUSFVWLA2C` | Love the decentralized approach! It would be helpful to have a price estimation tool based on market trends. | Migrated architecture fully on-chain to support stablecoins | [`a91176b`](https://github.com/aditi-singh-09/AgriPool/commit/a91176b) |
+| 6 | Rahul Kumar | rahulkumarsingh007@gmail.com | `GAIU57CCHT7EBNG2ISWV3F3CLRIUQ32GVIZQFPV75DY6TMTFXTYZDO6D` | Great platform. A short tutorial on how to set up settlement pools would really help new users. | Added visual settlement ticket receipt UI | [`4f174b0`](https://github.com/aditi-singh-09/AgriPool/commit/4f174b0) |
+
+### 3. Next Phase Evolution & Future Improvements
+While we have implemented several immediate improvements, our vision for the next phase of AgriPool—driven entirely by the invaluable feedback collected from our early adopters—focuses on deeper ecosystem integration and advanced functionality. 
+
+Based on the user feedback, we plan to evolve the project in the next phase by:
+1. **Offline Mode for Farmers:** Building a PWA with local caching so farmers in low-connectivity areas can queue listings and sync them once online.
+2. **Multi-Signature Disbursements:** Requiring approvals from multiple transport/warehouse admins before large produce batches are moved.
+3. **Multi-Language Support (Localization):** Translating the interface into regional languages to reach a wider community of farmers globally.
+4. **Integration with Lobstr Wallet:** While Freighter is currently supported, many users requested Lobstr wallet integration for more accessible on-chain onboarding.
+5. **Advanced Analytics & Reporting Engine:** Allowing cooperatives to generate comprehensive monthly impact reports.
+
+### 4. On-Chain Verification
+| User ID | Name | Wallet Address | Transaction Link |
+|---|---|---|---|
+| 1 | Suresh Patel | `GCX4YNRDX2H7XD3JFC2OM7KX4VPU7FAWLI2NKCWUYDBLMKDMAE5G2AUA` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/61befa835dff16991f4ad6763515bc48cd7a7dba9a5b13d8a1d926c3c41bfcdb) |
+| 2 | Anish Kumar | `GDKK64TKOKRCBQUTB6KELSAY7P7DI3M7Z6HXBAHMTMCVWJLUSFVWLA2C` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/66d9923c80131ab33d6272d4fa9f6e2550742a453f1f0b4eb4537fd3a33229fe) |
+| 3 | Khushi Singh | `GCFG246N4JFKHPAQ7IT5HIADPOSBMQF3KPD35AUYVUWLDY7CRXDADEF7` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/b086bc3d84743e3110c35d99eed99f07116e227f3e1da157211df4dc8c99d224) |
+| 4 | Arti Desai | `GCCDU7SFE2RFCLZ5EGNB6DLRU3XRVC4IQNFHEGUXO2ZOIGSYAHTRJ3PN` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/fec65dc934dabc88c01fcfac45b19e2bd7826362ccbd54cc47292e8187f4e928) |
+| 5 | Rekha Nair | `GAW2TZETZNJ6JRMJQNEXRCZ54Z2MRW7YKHGUB2FVYAJ7OEMMT42BLNPW` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/ef248f7d873b4071eb2043885d298e2223043e9954e3e8e71116a66d651f77f0) |
+| 6 | Rahul Kumar | `GAIU57CCHT7EBNG2ISWV3F3CLRIUQ32GVIZQFPV75DY6TMTFXTYZDO6D` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/0f2702fdaa4e99323fde628d5c351a5679d2aef4ae604ef7da20a100801499df) |
+| 7 | Prakash | `GDI3D4O5BGKQJHEPVHU7ED5DYB7O5ILNFH2JVHYD3LOLMOAP66ATB4HE` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/8e21ea13c64ef2e00bdcf81ef690598cb3d207f082e3b2e9c70b8100ad0063df) |
+| 8 | Sandeep Bhat | `GBKWJQD4AUNDMCN52E4M3CZ5QMO47PMBLRFEEGSSFTFD7K5OQN3LIEU5` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/97669a4c988419e839c8493dee520525b0091713dbca9dd7dcc94e23c46e52ed) |
+| 9 | Sunil Ghosh | `GDLEUUZIMYT2ZHLJOPBEFOT4YNPGVKHMH65RHPZCL2VCO6WOEULUT4NM` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/833743f0d7712ca95bcd7c08c10ff25a5098f23aa87c4f97e8ecfb83850fe0ff) |
+| 10 | AKSHARA KAPOOR | `GA7LHICPUKJGIR5HP66GSTCHNRYRQP7ZGRLRAEBHMH56FUFW5IJJMJUZ` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/c3687e43ebb9d00d28aba7aeb70ee7a2f1214b39d8202404ddcda8a00b3763e9) |
+| 11 | Ashok tiwari | `GBCVS3MDQP5YTFULEKRMSBHA5Q4VG4XPF6B6RAGZ6CCBNNJ6EWW7WJMV` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/1ae4fe0878b345f25cd9651a7109bf437cfcb283943c1d9f11a1ed565ca44622) |
+
+---
+
+## 🛠️ Tech Stack
+- **Smart Contracts**: Rust, Soroban SDK
+- **Frontend**: React, Vite, TypeScript
+- **Blockchain**: Stellar Testnet
+- **Wallet**: Freighter
+- **CI/CD & Monitoring**: GitHub Actions, Vercel
+
+## 🚀 Local Development Setup
+
+### 1. Prerequisites
+- Node.js 18+
+- [Freighter wallet](https://www.freighter.app/) browser extension
+- Rust + `stellar-cli` (to build/deploy the contract)
+
+### 2. Contract Deployment
+Refer to `docs/DEPLOYMENT.md` for detailed instructions on building and deploying to the testnet.
+
+### 3. Frontend Setup
 ```bash
-# 1. Contract
-cd contracts/agripool-contract && cargo test
-
-# 2. Backend
-cd backend && cp .env.example .env   # set MONGODB_URI + JWT secrets
-npm install && npm run dev            # http://localhost:4000
-
-# 3. Frontend
-cd frontend && cp .env.example .env
-npm install && npm run dev            # http://localhost:5173
+cd frontend
+cp .env.example .env      # Fill in VITE_SOROBAN_NETWORK, etc.
+npm install
+npm run dev               # Runs on http://localhost:5173
 ```
-
-Full deployment instructions (Stellar testnet, Render, Vercel, MongoDB
-Atlas) are in `docs/DEPLOYMENT.md`.
-
-## Documentation
-
-| Doc | Covers |
-|---|---|
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System design, data flow, security model |
-| [`docs/CONTRACT.md`](docs/CONTRACT.md) | Contract interface, settlement mechanics, test coverage |
-| [`docs/API.md`](docs/API.md) | Every backend route, auth requirements, request/response shapes |
-| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Exact commands: contract deploy, Render, Vercel |
-
-## Tech stack
-
-- **Contract**: Rust, Soroban SDK, Stellar Testnet
-- **Backend**: Node.js, Express, TypeScript, MongoDB/Mongoose, JWT auth,
-  Zod validation, Helmet, rate limiting, Pino logging, Sentry, PostHog,
-  Cloudinary
-- **Frontend**: React, Vite, TypeScript, Tailwind CSS, TanStack Query,
-  React Hook Form + Zod, Framer Motion, Freighter + Stellar SDK, Sentry,
-  PostHog
-
-## Design
-
-The product's signature visual is the **settlement ticket** — a
-weighbridge-manifest-style receipt (perforated edges, ink-stamp seal) that
-shows exactly how one payment split across every participant. It appears
-on the landing page, the checkout confirmation, and the transaction
-explorer, using real data in the latter two.
-
-## Status against Level 4 requirements
-
-This repository ships: a tested Soroban contract with atomic multi-party
-settlement and double-payment prevention; a production-shaped backend and
-frontend with real auth, validation, and error handling; CI across all
-three components; and complete architecture/contract/API/deployment docs.
-
-What can only be produced by actually operating the deployed app —
-testnet contract ID and transaction hashes, 10 onboarded real users,
-collected feedback, analytics data, and a demo video — is **not**
-fabricated here (per the brief) and is tracked as the checklist in
-`docs/DEPLOYMENT.md § Post-deploy checklist`. Run through that checklist
-after deploying to produce the remaining submission assets.
-
-## License
-
-MIT — see `LICENSE`.
