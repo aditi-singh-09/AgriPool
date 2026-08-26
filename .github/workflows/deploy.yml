@@ -2,7 +2,7 @@ name: Deploy Contracts to Testnet
 
 on:
   push:
-    branches: [ "master", "main" ]
+    branches: [master, main]
   workflow_dispatch:
 
 env:
@@ -12,26 +12,17 @@ jobs:
   deploy:
     name: Deploy to Testnet
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./contracts
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: wasm32-unknown-unknown
+          targets: wasm32-unknown-unknown,wasm32v1-none
 
-      - name: Cache cargo registry and binaries
-        uses: actions/cache@v4
+      - uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            target
-          key: ${{ runner.os }}-cargo-deploy-${{ hashFiles('**/Cargo.lock') }}
+          workspaces: contracts
 
       - name: Install cargo-binstall
         run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
@@ -39,24 +30,18 @@ jobs:
       - name: Install Stellar CLI
         run: cargo binstall --no-confirm stellar-cli
 
-      - name: Build contracts
-        run: |
-          cargo build --target wasm32-unknown-unknown --release
-          stellar contract optimize --wasm target/wasm32-unknown-unknown/release/agripool_contract.wasm
+      - name: Build contract
+        working-directory: contracts
+        run: stellar contract build
 
       - name: Deploy to Testnet
+        working-directory: contracts
         run: |
-          echo "Generating identities..."
-          stellar keys generate deployer --network testnet
-          stellar keys fund deployer --network testnet
-
-          echo "Deploying Contract..."
+          stellar keys generate deployer --network testnet --fund || true
           CONTRACT_ID=$(stellar contract deploy \
-            --wasm target/wasm32-unknown-unknown/release/agripool_contract.optimized.wasm \
+            --wasm target/wasm32v1-none/release/agripool_contract.wasm \
             --source deployer \
-            --network testnet 2>deploy_err.log) || { cat deploy_err.log; exit 1; }
+            --network testnet)
           echo "Contract deployed at: $CONTRACT_ID"
-          
-          echo "Fetching Test Token (Native XLM asset) ID..."
           TOKEN_ID=$(stellar contract id asset --asset native --network testnet)
-          echo "Native Token ID is: $TOKEN_ID"
+          echo "Native Token ID: $TOKEN_ID"
