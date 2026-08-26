@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCreateListing } from '../features/listings/useListings';
-import { usePools } from '../features/pools/usePools';
 import { Field } from '../components/ui/Field';
 import { SelectField } from '../components/ui/SelectField';
 import { TextAreaField } from '../components/ui/TextAreaField';
@@ -27,7 +26,6 @@ type FormOutput = z.output<typeof schema>;
 export function CreateListingPage() {
   const navigate = useNavigate();
   const createListing = useCreateListing();
-  const { data: pools } = usePools();
 
   const {
     register,
@@ -83,14 +81,7 @@ export function CreateListingPage() {
             {...register('quantityAvailable')}
           />
         </div>
-        <SelectField label="Settlement pool" error={errors.poolId?.message} {...register('poolId')}>
-          <option value="">Select a pool…</option>
-          {pools?.map((pool) => (
-            <option key={pool.poolId} value={pool.poolId}>
-              {pool.cooperativeName} ({pool.poolId})
-            </option>
-          ))}
-        </SelectField>
+        <Field label="Settlement pool ID" placeholder="e.g. POOL123" error={errors.poolId?.message} {...register('poolId')} />
         <Field label="Region (optional)" error={errors.region?.message} {...register('region')} />
         <Button type="submit" isLoading={isSubmitting} className="mt-2">
           Publish listing

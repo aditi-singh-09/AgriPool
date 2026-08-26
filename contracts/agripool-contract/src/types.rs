@@ -31,12 +31,28 @@ pub struct Payment {
 }
 
 #[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Listing {
+    pub listing_id: Symbol,
+    pub pool_id: Symbol,
+    pub farmer: Address,
+    pub title: soroban_sdk::String,
+    pub price: i128,
+    pub quantity: u32,
+    pub active: bool,
+    pub created_at: u64,
+}
+
+#[contracttype]
 #[derive(Clone)]
 pub enum DataKey {
     Admin,
     Pool(Symbol),
     Payment(Symbol),
     History(Symbol),
+    Listing(Symbol),
+    FarmerListings(Address),
+    AllListings,
 }
 
 #[contracterror]
@@ -54,4 +70,6 @@ pub enum Error {
     InvalidAmount = 9,
     PaymentAlreadySettled = 10,
     PaymentNotFound = 11,
+    ListingNotFound = 12,
+    ListingAlreadyExists = 13,
 }

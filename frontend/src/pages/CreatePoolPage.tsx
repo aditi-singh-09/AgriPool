@@ -71,7 +71,7 @@ export function CreatePoolPage() {
           shareBps: Math.round(p.sharePercent * 100),
         })),
       });
-      toast.success('Pool registered off-chain — see the note below to finish on-chain setup');
+      toast.success('Pool registered on-chain');
       navigate('/dashboard');
     } catch (error) {
       toast.error(getApiErrorMessage(error));
@@ -84,11 +84,7 @@ export function CreatePoolPage() {
       <p className="mt-1.5 text-sm text-graphite-600">
         Define every participant's wallet and share. Shares must total exactly 100%.
       </p>
-      <div className="mt-4 rounded-lg border border-ledger-500/40 bg-ledger-500/10 p-3 text-xs text-ledger-400">
-        This form registers the pool in AgriPool's directory so listings can reference it. The matching
-        on-chain <code>create_pool</code> call is signed by the platform admin wallet as the final step —
-        see <code>docs/DEPLOYMENT.md</code> for the exact command your cooperative's data will be submitted with.
-      </div>
+        This form registers the pool directly to the Stellar testnet smart contract. You will be prompted by Freighter to sign the transaction.
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 flex flex-col gap-4" noValidate>
         <Field label="Pool ID" placeholder="pool_valley_coop" error={errors.poolId?.message} {...register('poolId')} />

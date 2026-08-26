@@ -66,7 +66,7 @@ fn test_create_pool_with_valid_shares() {
     let (_, client) = setup(&env);
     let (participants, ..) = standard_participants(&env);
 
-    client.create_pool(&symbol_short!("pool1"), &participants);
+    client.create_pool(&symbol_short!("pool1"), &participants, &coop);
     let pool = client.get_pool(&symbol_short!("pool1"));
     assert_eq!(pool.participants.len(), 4);
     assert!(pool.active);
@@ -87,7 +87,7 @@ fn test_create_pool_rejects_bad_share_sum() {
         },
     ];
 
-    let result = client.try_create_pool(&symbol_short!("pool2"), &bad);
+    let result = client.try_create_pool(&symbol_short!("pool2"), &bad, &farmer);
     assert_eq!(result, Err(Ok(Error::SharesMustSumToTotal)));
 }
 
@@ -97,7 +97,7 @@ fn test_settle_distributes_atomically() {
     env.mock_all_auths();
     let (admin, client) = setup(&env);
     let (participants, farmer, coop, transport, warehouse) = standard_participants(&env);
-    client.create_pool(&symbol_short!("pool1"), &participants);
+    client.create_pool(&symbol_short!("pool1"), &participants, &coop);
 
     let (token_addr, token_client, token_admin) = create_token_contract(&env, &admin);
     let buyer = Address::generate(&env);
@@ -130,7 +130,7 @@ fn test_settle_rejects_duplicate_payment_id() {
     env.mock_all_auths();
     let (admin, client) = setup(&env);
     let (participants, ..) = standard_participants(&env);
-    client.create_pool(&symbol_short!("pool1"), &participants);
+    client.create_pool(&symbol_short!("pool1"), &participants, &coop);
 
     let (token_addr, _token_client, token_admin) = create_token_contract(&env, &admin);
     let buyer = Address::generate(&env);
@@ -160,7 +160,7 @@ fn test_settle_rejects_inactive_pool() {
     env.mock_all_auths();
     let (admin, client) = setup(&env);
     let (participants, ..) = standard_participants(&env);
-    client.create_pool(&symbol_short!("pool1"), &participants);
+    client.create_pool(&symbol_short!("pool1"), &participants, &coop);
     client.retire_pool(&symbol_short!("pool1"));
 
     let (token_addr, _token_client, token_admin) = create_token_contract(&env, &admin);
@@ -183,7 +183,7 @@ fn test_rounding_remainder_goes_to_last_participant() {
     env.mock_all_auths();
     let (admin, client) = setup(&env);
     let (participants, farmer, coop, transport, warehouse) = standard_participants(&env);
-    client.create_pool(&symbol_short!("pool1"), &participants);
+    client.create_pool(&symbol_short!("pool1"), &participants, &coop);
 
     let (token_addr, token_client, token_admin) = create_token_contract(&env, &admin);
     let buyer = Address::generate(&env);
@@ -210,7 +210,7 @@ fn test_update_pool_changes_future_settlements_only() {
     env.mock_all_auths();
     let (_, client) = setup(&env);
     let (participants, ..) = standard_participants(&env);
-    client.create_pool(&symbol_short!("pool1"), &participants);
+    client.create_pool(&symbol_short!("pool1"), &participants, &coop);
 
     let new_farmer = Address::generate(&env);
     let coop = Address::generate(&env);
@@ -253,7 +253,7 @@ fn test_ledger_timestamp_recorded() {
     env.ledger().set_timestamp(1_700_000_000);
     let (admin, client) = setup(&env);
     let (participants, ..) = standard_participants(&env);
-    client.create_pool(&symbol_short!("pool1"), &participants);
+    client.create_pool(&symbol_short!("pool1"), &participants, &coop);
 
     let (token_addr, _tc, token_admin) = create_token_contract(&env, &admin);
     let buyer = Address::generate(&env);
@@ -269,4 +269,33 @@ fn test_ledger_timestamp_recorded() {
 
     let payment = client.get_payment(&symbol_short!("pay004"));
     assert_eq!(payment.timestamp, 1_700_000_000);
+}
+
+#[test]
+fn test_create_listing() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let (_, client) = setup(&env);
+    let (participants, farmer, coop, ..) = standard_participants(&env);
+    client.create_pool(&symbol_short!("pool1"), &participants, &coop);
+
+    client.create_listing(
+        &symbol_short!("list1"),
+        &symbol_short!("pool1"),
+        &farmer,
+        &soroban_sdk::String::from_str(&env, "Premium Wheat"),
+        &500_000,
+        &100,
+    );
+
+    let listing = client.get_listing(&symbol_short!("list1"));
+    assert_eq!(listing.price, 500_000);
+    assert_eq!(listing.quantity, 100);
+    assert_eq!(listing.farmer, farmer);
+
+    let all = client.get_all_listings();
+    assert_eq!(all.len(), 1);
+    
+    let farmer_listings = client.get_farmer_listings(&farmer);
+    assert_eq!(farmer_listings.len(), 1);
 }

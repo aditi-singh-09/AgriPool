@@ -16,7 +16,7 @@ use soroban_sdk::{
     Vec,
 };
 
-pub use types::{DataKey, Error, Participant, Payment, Pool};
+pub use types::{DataKey, Error, Participant, Payment, Pool, Listing};
 
 contractmeta!(
     key = "Description",
@@ -45,14 +45,14 @@ impl AgriPoolContract {
 
     /// Registers a new distribution pool: an ordered set of participants
     /// with wallet addresses and basis-point shares. Shares must sum to
-    /// exactly 10_000. Requires admin authorization.
+    /// exactly 10_000.
     pub fn create_pool(
         env: Env,
         pool_id: Symbol,
         participants: Vec<Participant>,
+        caller: Address,
     ) -> Result<(), Error> {
-        let admin = Self::require_admin(&env)?;
-        admin.require_auth();
+        caller.require_auth();
 
         if env
             .storage()
@@ -209,6 +209,69 @@ impl AgriPoolContract {
         Ok(())
     }
 
+    pub fn create_listing(
+        env: Env,
+        listing_id: Symbol,
+        pool_id: Symbol,
+        farmer: Address,
+        title: String,
+        price: i128,
+        quantity: u32,
+    ) -> Result<(), Error> {
+        farmer.require_auth();
+
+        if env
+            .storage()
+            .persistent()
+            .has(&DataKey::Listing(listing_id.clone()))
+        {
+            return Err(Error::ListingAlreadyExists);
+        }
+
+        if !env.storage().persistent().has(&DataKey::Pool(pool_id.clone())) {
+            return Err(Error::PoolNotFound);
+        }
+
+        let listing = Listing {
+            listing_id: listing_id.clone(),
+            pool_id: pool_id.clone(),
+            farmer: farmer.clone(),
+            title,
+            price,
+            quantity,
+            active: true,
+            created_at: env.ledger().timestamp(),
+        };
+
+        env.storage()
+            .persistent()
+            .set(&DataKey::Listing(listing_id.clone()), &listing);
+
+        // Update farmer listings
+        let mut f_listings: Vec<Symbol> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::FarmerListings(farmer.clone()))
+            .unwrap_or_else(|| Vec::new(&env));
+        f_listings.push_back(listing_id.clone());
+        env.storage()
+            .persistent()
+            .set(&DataKey::FarmerListings(farmer), &f_listings);
+
+        // Update all listings
+        let mut all_listings: Vec<Symbol> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::AllListings)
+            .unwrap_or_else(|| Vec::new(&env));
+        all_listings.push_back(listing_id.clone());
+        env.storage()
+            .persistent()
+            .set(&DataKey::AllListings, &all_listings);
+
+        Ok(())
+    }
+
     pub fn get_pool(env: Env, pool_id: Symbol) -> Result<Pool, Error> {
         env.storage()
             .persistent()
@@ -229,6 +292,27 @@ impl AgriPoolContract {
         env.storage()
             .persistent()
             .get(&DataKey::History(pool_id))
+            .unwrap_or_else(|| Vec::new(&env))
+    }
+
+    pub fn get_listing(env: Env, listing_id: Symbol) -> Result<Listing, Error> {
+        env.storage()
+            .persistent()
+            .get(&DataKey::Listing(listing_id))
+            .ok_or(Error::ListingNotFound)
+    }
+
+    pub fn get_all_listings(env: Env) -> Vec<Symbol> {
+        env.storage()
+            .persistent()
+            .get(&DataKey::AllListings)
+            .unwrap_or_else(|| Vec::new(&env))
+    }
+
+    pub fn get_farmer_listings(env: Env, farmer: Address) -> Vec<Symbol> {
+        env.storage()
+            .persistent()
+            .get(&DataKey::FarmerListings(farmer))
             .unwrap_or_else(|| Vec::new(&env))
     }
 
