@@ -19,6 +19,7 @@ const schema = z.object({
   quantityAvailable: z.coerce.number().positive(),
   poolId: z.string().min(3),
   region: z.string().max(80).optional(),
+  certificateUrl: z.string().url("Must be a valid URL").optional(),
 });
 type FormInput = z.input<typeof schema>;
 type FormOutput = z.output<typeof schema>;
@@ -80,7 +81,11 @@ export function CreateListingPage() {
             error={errors.pricePerUnit?.message}
             {...register('pricePerUnit')}
           />
+          <p className="text-xs text-marigold-500 mt-1">Market Avg: ~4.50 XLM</p>
+        </div>
+        <div>
           <Field
+
             label="Quantity available"
             type="number"
             error={errors.quantityAvailable?.message}
@@ -88,7 +93,11 @@ export function CreateListingPage() {
           />
         </div>
         <Field label="Settlement pool ID" placeholder="e.g. POOL123" error={errors.poolId?.message} {...register('poolId')} />
-        <Field label="Region (optional)" error={errors.region?.message} {...register('region')} />
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Region (optional)" error={errors.region?.message} {...register('region')} />
+          {/* Feature: Quality Inspection Certificate Link */}
+          <Field label="Quality Certificate URL (optional)" placeholder="https://..." error={errors.certificateUrl?.message} {...register('certificateUrl')} />
+        </div>
         <Button type="submit" isLoading={isSubmitting} className="mt-2">
           Publish listing
         </Button>
