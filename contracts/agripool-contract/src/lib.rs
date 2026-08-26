@@ -11,10 +11,7 @@
 mod events;
 mod types;
 
-use soroban_sdk::{
-    contract, contractimpl, contractmeta, token, Address, Env, String, Symbol,
-    Vec,
-};
+use soroban_sdk::{contract, contractimpl, contractmeta, token, Address, Env, String, Symbol, Vec};
 
 pub use types::{DataKey, Error, Listing, Participant, Payment, Pool};
 

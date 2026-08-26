@@ -295,7 +295,7 @@ fn test_create_listing() {
 
     let all = client.get_all_listings();
     assert_eq!(all.len(), 1);
-    
+
     let farmer_listings = client.get_farmer_listings(&farmer);
     assert_eq!(farmer_listings.len(), 1);
 }
