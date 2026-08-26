@@ -3,6 +3,7 @@ name: Deploy Contracts to Testnet
 on:
   push:
     branches: [ "master", "main" ]
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
