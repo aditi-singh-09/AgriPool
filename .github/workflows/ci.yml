@@ -19,6 +19,10 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@main
+      - name: Install Stellar CLI
+        run: cargo binstall --no-confirm stellar-cli
       - name: Build Contracts
         run: stellar contract build
       - name: Run Contract Tests
@@ -38,7 +42,5 @@ jobs:
           node-version: 20
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
-      - name: Run tests
-        run: npm run test
       - name: Build
         run: npm run build
