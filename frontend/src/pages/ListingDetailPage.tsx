@@ -4,8 +4,7 @@ import { toast } from 'sonner';
 import { PackageSearch, MapPin } from 'lucide-react';
 import { useListing } from '../features/listings/useListings';
 import { usePool } from '../features/pools/usePools';
-import { useAuth } from '../features/auth/AuthContext';
-import { useFreighterWallet } from '../features/wallet/useFreighterWallet';
+import { useWalletAuth } from '../features/auth/useWalletAuth';
 import { useRecordPayment } from '../features/payments/usePayments';
 import { submitSettlement, nativeAssetContractId } from '../features/payments/settlementService';
 import { Button } from '../components/ui/Button';
@@ -17,8 +16,8 @@ const XLM_TO_STROOPS = 10_000_000n;
 
 export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
-  const wallet = useFreighterWallet();
+  const { isConnected, address, connect, isConnecting } = useWalletAuth();
+  const wallet = { address, connect, isConnecting };
   const { data: listing, isLoading } = useListing(id);
   const { data: pool } = usePool(listing?.poolId);
   const recordPayment = useRecordPayment();
@@ -35,8 +34,8 @@ export function ListingDetailPage() {
 
   const handleSettle = async () => {
     if (!listing || !pool) return;
-    if (!user) {
-      toast.error('Log in as a buyer before checking out');
+    if (!isConnected) {
+      toast.error('Connect your Freighter wallet to check out');
       return;
     }
     if (!wallet.address) {
@@ -165,7 +164,7 @@ export function ListingDetailPage() {
             </div>
 
             {!wallet.address ? (
-              <Button className="mt-6 w-full" onClick={wallet.connect} isLoading={wallet.isConnecting}>
+              <Button className="mt-6 w-full" onClick={() => wallet.connect('buyer', 'AgriPool User')} isLoading={wallet.isConnecting}>
                 Connect wallet to pay
               </Button>
             ) : (

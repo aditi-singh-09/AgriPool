@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../features/auth/AuthContext';
+import { useWalletAuth } from '../features/auth/useWalletAuth';
 import type { UserRole } from '../types';
 import { Spinner } from './Spinner';
 
 export function ProtectedRoute({ children, roles }: { children: ReactNode; roles?: UserRole[] }) {
-  const { user, isLoading } = useAuth();
+  const { isConnected, isConnecting, role } = useWalletAuth();
   const location = useLocation();
 
-  if (isLoading) {
+  if (isConnecting) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <Spinner />
@@ -16,11 +16,11 @@ export function ProtectedRoute({ children, roles }: { children: ReactNode; roles
     );
   }
 
-  if (!user) {
+  if (!isConnected) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (roles && !roles.includes(user.role)) {
+  if (roles && role && !roles.includes(role)) {
     return <Navigate to="/dashboard" replace />;
   }
 

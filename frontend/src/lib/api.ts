@@ -1,80 +1,92 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api';
-
-export const api = axios.create({ baseURL: API_BASE_URL });
-
-const TOKEN_KEY = 'agripool.accessToken';
-const REFRESH_KEY = 'agripool.refreshToken';
-
-export const tokenStorage = {
-  getAccess: () => localStorage.getItem(TOKEN_KEY),
-  getRefresh: () => localStorage.getItem(REFRESH_KEY),
-  set: (accessToken: string, refreshToken: string) => {
-    localStorage.setItem(TOKEN_KEY, accessToken);
-    localStorage.setItem(REFRESH_KEY, refreshToken);
-  },
-  setAccess: (accessToken: string) => localStorage.setItem(TOKEN_KEY, accessToken),
-  clear: () => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(REFRESH_KEY);
-  },
-};
-
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = tokenStorage.getAccess();
-  if (token) {
-    config.headers.set('Authorization', `Bearer ${token}`);
-  }
-  return config;
-});
-
-let refreshPromise: Promise<string> | null = null;
-
-api.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError) => {
-    const original = error.config as (InternalAxiosRequestConfig & { _retried?: boolean }) | undefined;
-    const isAuthEndpoint = original?.url?.includes('/auth/');
-
-    if (error.response?.status === 401 && original && !original._retried && !isAuthEndpoint) {
-      const refreshToken = tokenStorage.getRefresh();
-      if (!refreshToken) {
-        tokenStorage.clear();
-        return Promise.reject(error);
-      }
-
-      original._retried = true;
-      try {
-        refreshPromise ??= api
-          .post('/auth/refresh', { refreshToken })
-          .then((res) => {
-            tokenStorage.setAccess(res.data.accessToken);
-            return res.data.accessToken as string;
-          })
-          .finally(() => {
-            refreshPromise = null;
-          });
-
-        const newAccessToken = await refreshPromise;
-        original.headers.set('Authorization', `Bearer ${newAccessToken}`);
-        return api(original);
-      } catch (refreshError) {
-        tokenStorage.clear();
-        window.location.assign('/login');
-        return Promise.reject(refreshError);
-      }
-    }
-
-    return Promise.reject(error);
-  },
-);
+import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 export function getApiErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    const message = (error.response?.data as { error?: { message?: string } } | undefined)?.error?.message;
+    const message = (error.response?.data as { error?: { message?: string } } | undefined)?.error
+      ?.message;
     if (message) return message;
-    if (error.code === 'ERR_NETWORK') return "Can't reach the AgriPool API right now.";
   }
+  if (error instanceof Error) return error.message;
   return 'Something went wrong. Please try again.';
 }
+
+// ---------------------------------------------------------
+// LocalStorage Mock API (Replaces Centralized Backend)
+// ---------------------------------------------------------
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function getLocal<T>(key: string, defaultValue: T): T {
+  const stored = localStorage.getItem(key);
+  if (!stored) return defaultValue;
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return defaultValue;
+  }
+}
+
+function setLocal<T>(key: string, value: T) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+export const api = {
+  get: async (url: string, ..._args: any[]): Promise<any> => {
+    await delay(300);
+    if (url === '/pools') {
+      return { data: { pools: getLocal('agripool_pools', []) } };
+    }
+    if (url.startsWith('/pools/')) {
+      const id = url.split('/').pop();
+      const pool = getLocal<any[]>('agripool_pools', []).find((p) => p.poolId === id);
+      if (pool) return { data: { pool } };
+      throw new Error('Not found');
+    }
+    if (url === '/listings') {
+      const all = getLocal<any[]>('agripool_listings', []);
+      return { data: { listings: all.filter((l) => l.status === 'active'), total: all.length, pages: 1 } };
+    }
+    if (url.startsWith('/listings/')) {
+      const id = url.split('/').pop();
+      const listing = getLocal<any[]>('agripool_listings', []).find((l) => l._id === id);
+      if (listing) return { data: { listing } };
+      throw new Error('Not found');
+    }
+    if (url === '/payments/me') {
+      return { data: { payments: getLocal('agripool_payments', []) } };
+    }
+    return { data: {} };
+  },
+  post: async (url: string, body: any, ..._args: any[]): Promise<any> => {
+    await delay(400);
+    if (url === '/pools') {
+      const pools = getLocal<any[]>('agripool_pools', []);
+      const newPool = { _id: uuidv4(), ...body, active: true, createdAt: new Date().toISOString() };
+      setLocal('agripool_pools', [...pools, newPool]);
+      return { data: { pool: newPool } };
+    }
+    if (url === '/listings') {
+      const listings = getLocal<any[]>('agripool_listings', []);
+      const newListing = { _id: uuidv4(), ...body, status: 'active', createdAt: new Date().toISOString(), sellerId: { _id: 'local', displayName: localStorage.getItem('agripool.displayName') || 'User' } };
+      setLocal('agripool_listings', [...listings, newListing]);
+      return { data: { listing: newListing } };
+    }
+    if (url === '/payments') {
+      const payments = getLocal<any[]>('agripool_payments', []);
+      const newPayment = { _id: uuidv4(), ...body, status: 'confirmed', createdAt: new Date().toISOString() };
+      setLocal('agripool_payments', [...payments, newPayment]);
+      
+      // Update listing status
+      if (body.listingId) {
+        const listings = getLocal<any[]>('agripool_listings', []);
+        const idx = listings.findIndex(l => l._id === body.listingId);
+        if (idx !== -1) {
+          listings[idx].status = 'sold';
+          setLocal('agripool_listings', listings);
+        }
+      }
+      return { data: { payment: newPayment } };
+    }
+    return { data: {} };
+  }
+};

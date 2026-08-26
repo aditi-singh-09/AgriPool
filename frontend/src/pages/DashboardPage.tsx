@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Receipt, PlusCircle, Boxes } from 'lucide-react';
-import { useAuth } from '../features/auth/AuthContext';
+import { useWalletAuth } from '../features/auth/useWalletAuth';
 import { useMyPayments } from '../features/payments/usePayments';
 import { EmptyState } from '../components/EmptyState';
 import { Spinner } from '../components/Spinner';
@@ -11,20 +11,29 @@ function formatStroopsToXlm(amount: string): string {
   return (Number(BigInt(amount)) / 10_000_000).toFixed(2);
 }
 
+function shortAddress(address: string): string {
+  return `${address.slice(0, 8)}…${address.slice(-6)}`;
+}
+
 export function DashboardPage() {
-  const { user } = useAuth();
+  const { isConnected, address, role, displayName } = useWalletAuth();
   const { data: payments, isLoading } = useMyPayments();
 
-  if (!user) return null;
+  if (!isConnected) return null;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-semibold">Welcome, {user.displayName}</h1>
-          <p className="mt-1 text-sm capitalize text-graphite-600">{user.role} account</p>
+          <h1 className="font-display text-3xl font-semibold">
+            Welcome, {displayName ?? shortAddress(address ?? '')}
+          </h1>
+          <p className="mt-1 text-sm capitalize text-graphite-600">{role} account</p>
+          {address && (
+            <p className="mt-0.5 font-mono text-xs text-graphite-600">{address}</p>
+          )}
         </div>
-        {(user.role === 'farmer' || user.role === 'cooperative') && (
+        {(role === 'farmer' || role === 'cooperative') && (
           <Link to="/listings/new">
             <Button>
               <PlusCircle className="h-4 w-4" aria-hidden />
@@ -32,7 +41,7 @@ export function DashboardPage() {
             </Button>
           </Link>
         )}
-        {user.role === 'cooperative' && (
+        {role === 'cooperative' && (
           <Link to="/pools/new">
             <Button variant="secondary">
               <Boxes className="h-4 w-4" aria-hidden />

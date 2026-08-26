@@ -6,7 +6,6 @@ import { Toaster } from 'sonner';
 import App from './App';
 import './index.css';
 import { queryClient } from './lib/queryClient';
-import { AuthProvider } from './features/auth/AuthContext';
 import { initErrorMonitoring } from './lib/monitoring';
 
 initErrorMonitoring();
@@ -15,19 +14,17 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <App />
-          <Toaster
-            theme="dark"
-            toastOptions={{
-              style: {
-                background: '#26241D',
-                border: '1px solid #443F30',
-                color: '#F5F0E1',
-              },
-            }}
-          />
-        </AuthProvider>
+        <App />
+        <Toaster
+          theme="dark"
+          toastOptions={{
+            style: {
+              background: '#26241D',
+              border: '1px solid #443F30',
+              color: '#F5F0E1',
+            },
+          }}
+        />
       </QueryClientProvider>
     </BrowserRouter>
   </StrictMode>,
